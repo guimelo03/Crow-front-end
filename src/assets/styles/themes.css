@@ -1,0 +1,44 @@
+body {
+    background-color: #f8f9fa;
+    color: #333;
+}
+body.dark-mode {
+    background-color: #1a202c;
+    color: #a0aec0;
+}
+
+.card {
+    background-color: white;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+body.dark-mode .card {
+    background-color: #2d3748;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.student-email, .student-id {
+    color: #34495e;
+}
+body.dark-mode .student-email, body.dark-mode .student-id {
+    color: #e2e8f0;
+}
+
+.edit-button, .delete-button, .view-button {
+    color: white;
+}
+body.dark-mode .edit-button, body.dark-mode .delete-button, body.dark-mode .view-button {
+    color: white; 
+}
+
+.card-course {
+    background-color: white;
+}
+body.dark-mode .card-course {
+    background-color: #2d3748;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+body.dark-mode .card-course .title,
+body.dark-mode .card-course .text-muted,
+body.dark-mode .card-course p {
+    color: #e2e8f0;
+}

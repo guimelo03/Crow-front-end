@@ -2,33 +2,35 @@
   <div class="page-container">
     <div class="header-actions">
       <router-link to="/dashboard" class="back-link">← Voltar para o Dashboard</router-link>
-      <router-link to="/create-and-enroll" class="create-button">
+      <router-link to="/create-course" class="create-button">
         Criar Novo Curso
       </router-link>
     </div>
     <h1 class="page-title">Meus Cursos</h1>
     <p v-if="loading" class="status-message">Carregando seus cursos...</p>
-    <div v-else-if="enrolledCourses.length === 0" class="empty-message">
-      <p>Você ainda não está matriculado em nenhum curso.</p>
+    <div v-else-if="myCourses.length === 0" class="empty-message">
+      <p>Você ainda não criou nenhum curso.</p>
     </div>
     <div v-else class="course-grid">
-      <div v-for="enrollment in enrolledCourses" :key="enrollment.id" class="course-card">
-        <h2 class="course-title">{{ enrollment.course.title }}</h2>
-        <p class="course-description">{{ enrollment.course.description }}</p>
-        <p v-if="enrollment.course.course_type" class="course-type">
-          <span>Tipo:</span> {{ enrollment.course.course_type }}
+      <div v-for="course in myCourses" :key="course.id" class="course-card">
+        <h2 class="course-title">{{ course.title }}</h2>
+        <p class="course-description">{{ course.description }}</p>
+        <p v-if="course.course_type" class="course-type">
+          <span>Tipo:</span> {{ course.course_type }}
         </p>
-        <span class="course-status">Status: {{ statusText(enrollment.status) }}</span>
-        <a v-if="enrollment.course.link" :href="enrollment.course.link" target="_blank" class="course-link">
+        <a v-if="course.link" :href="course.link" target="_blank" class="course-link">
           Acessar Curso
         </a>
         <div class="actions">
-          <router-link :to="{ name: 'edit-enrollment', params: { id: enrollment.id } }" class="action-button edit-button">
-            Editar Status
+          <router-link 
+            :to="{ name: 'edit-course', params: { id: course.id } }" 
+            class="action-button edit-button"
+          >
+            Editar Curso
           </router-link>
           
-          <button @click="deleteEnrollment(enrollment.id)" class="action-button delete-button">
-            Excluir Matrícula
+          <button @click="deleteCourse(course.id)" class="action-button delete-button">
+            Excluir Curso
           </button>
         </div>
       </div>
@@ -41,57 +43,47 @@
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import { useRouter } from 'vue-router';
+import { jwtDecode } from 'jwt-decode';
 
-interface EnrolledCourse {
+interface UserCourse {
   id: number;
-  status: string;
-  course: {
-    id: number;
-    title: string;
-    description: string;
-    link: string;
-    course_type: string;
-  };
+  title: string;
+  description: string;
+  link: string;
+  course_type: string;
 }
 
-const enrolledCourses = ref<EnrolledCourse[]>([]);
+const myCourses = ref<UserCourse[]>([]);
 const loading = ref(true);
 const error = ref<string | null>(null);
 
 const router = useRouter();
 
-const fetchEnrolledCourses = async () => {
+const fetchMyCourses = async () => {
   const token = localStorage.getItem('token');
   if (!token) {
     router.push('/login');
     return;
   }
   try {
-    const response = await axios.get('http://localhost:3000/api/v1/enrollments', {
+    const response = await axios.get('http://localhost:3000/api/v1/courses', {
       headers: { Authorization: `Bearer ${token}` },
     });
     
-    const enrollmentsData = response.data.enrollments;
-    
-    if (Array.isArray(enrollmentsData)) {
-      enrolledCourses.value = enrollmentsData;
-    } else {
-      enrolledCourses.value = [];
-    }
-    
-    console.log('Cursos matriculados:', enrolledCourses.value);
+    // A API já filtra os cursos por usuário, então podemos atribuir diretamente
+    myCourses.value = response.data.courses;
   } catch (err) {
-    console.error('Erro ao carregar cursos matriculados:', err);
+    console.error('Erro ao carregar os cursos do usuário:', err);
     error.value = 'Falha ao carregar a lista de cursos.';
   } finally {
     loading.value = false;
   }
 };
 
-onMounted(fetchEnrolledCourses);
+onMounted(fetchMyCourses);
 
-const deleteEnrollment = async (enrollmentId: number) => {
-  if (!confirm('Tem certeza de que deseja remover este curso de sua lista?')) {
+const deleteCourse = async (courseId: number) => {
+  if (!confirm('Tem certeza de que deseja excluir este curso?')) {
     return;
   }
   const token = localStorage.getItem('token');
@@ -100,27 +92,14 @@ const deleteEnrollment = async (enrollmentId: number) => {
     return;
   }
   try {
-    await axios.delete(`http://localhost:3000/api/v1/enrollments/${enrollmentId}`, {
+    await axios.delete(`http://localhost:3000/api/v1/courses/${courseId}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
-    alert('Matrícula excluída com sucesso!');
-    await fetchEnrolledCourses(); 
+    alert('Curso excluído com sucesso!');
+    await fetchMyCourses(); 
   } catch (err) {
-    console.error('Erro ao excluir matrícula:', err);
-    error.value = 'Falha ao excluir a matrícula.';
-  }
-};
-
-const statusText = (status: string) => {
-  switch (status) {
-    case 'to_do':
-      return 'A iniciar';
-    case 'in_progress':
-      return 'Em andamento';
-    case 'completed':
-      return 'Finalizado';
-    default:
-      return status;
+    console.error('Erro ao excluir curso:', err);
+    error.value = 'Falha ao excluir o curso.';
   }
 };
 </script>
@@ -250,16 +229,6 @@ body.dark-mode .course-type span {
 .course-link:hover {
   color: #9370DB;
   text-decoration: underline;
-}
-.course-status {
-  font-style: italic;
-  color: #95a5a6;
-  font-size: 1rem;
-  text-align: center;
-  margin-top: 0.5rem;
-}
-body.dark-mode .course-status {
-  color: #95a5a6;
 }
 .actions {
   display: flex;

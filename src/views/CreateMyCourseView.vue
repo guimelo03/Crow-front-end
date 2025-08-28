@@ -1,9 +1,9 @@
 <template>
   <div class="page-container">
     <router-link to="/my-courses" class="back-link">← Voltar para Meus Cursos</router-link>
-    <h1 class="page-title">Criar e Matricular-se em um Novo Curso</h1>
+    <h1 class="page-title">Criar Novo Curso</h1>
 
-    <form @submit.prevent="createAndEnroll" class="course-form">
+    <form @submit.prevent="createCourse" class="course-form">
       <div class="form-group">
         <label for="title">Título do Curso:</label>
         <input type="text" id="title" v-model="course.title" required />
@@ -29,7 +29,7 @@
         </select>
       </div>
 
-      <button type="submit" class="submit-button">Criar e Matricular-se</button>
+      <button type="submit" class="submit-button">Criar Curso</button>
       <div v-if="error" class="error-message">{{ error }}</div>
     </form>
   </div>
@@ -57,28 +57,31 @@ const course = ref<Course>({
 const error = ref<string | null>(null);
 const router = useRouter();
 
-const createAndEnroll = async () => {
+const createCourse = async () => {
   const token = localStorage.getItem('token');
   if (!token) {
     router.push('/login');
     return;
   }
   try {
+    // Altere o endpoint para a nova rota de criação de cursos.
     await axios.post(
-      'http://localhost:3000/api/v1/enrollments/create_and_enroll_course',
+      'http://localhost:3000/api/v1/courses',
       { course: course.value },
       { headers: { Authorization: `Bearer ${token}` } }
     );
-    alert('Curso criado e matrícula realizada com sucesso!');
+    alert('Curso criado com sucesso!');
+    // Redirecione o usuário de volta para a página de "Meus Cursos" para ver o curso novo.
     router.push('/my-courses');
   } catch (err) {
-    console.error('Erro ao criar curso e matricular-se:', err);
-    error.value = 'Falha ao criar e matricular-se no curso. Verifique se todos os campos estão preenchidos.';
+    console.error('Erro ao criar o curso:', err);
+    error.value = 'Falha ao criar o curso. Verifique se todos os campos estão preenchidos.';
   }
 };
 </script>
 
 <style scoped>
+/* O estilo CSS pode permanecer o mesmo, já que ele apenas estiliza o formulário */
 .page-container {
   max-width: 600px;
   margin: 2rem auto;
@@ -112,7 +115,7 @@ body.dark-mode .page-title {
   color: #a0aec0;
 }
 .course-form .form-group {
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.5rindeem;
 }
 .course-form label {
   display: block;
@@ -141,7 +144,7 @@ body.dark-mode .course-form label {
 .submit-button {
   width: 100%;
   padding: 1rem;
-  background-color: #6A0DAD;
+  background-color: #28a745;
   color: white;
   border: none;
   border-radius: 6px;
@@ -150,7 +153,7 @@ body.dark-mode .course-form label {
   transition: background-color 0.3s;
 }
 .submit-button:hover {
-  background-color: #9370DB;
+  background-color: #218838;
 }
 .error-message {
   color: #d9534f;

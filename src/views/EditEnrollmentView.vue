@@ -72,7 +72,7 @@ const fetchEnrollment = async () => {
   }
 
   try {
-    const response = await axios.get(`http://localhost:3000/api/v1/enrollments/${enrollmentId}`, {
+    const response = await axios.get(`http://localhost:3000/api/v1/courses/${enrollmentId}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     
@@ -106,7 +106,7 @@ const updateStatus = async () => {
   
   isUpdating.value = true;
   try {
-    await axios.patch(`http://localhost:3000/api/v1/enrollments/${enrollment.value.id}`, {
+    await axios.patch(`http://localhost:3000/api/v1/courses/${enrollment.value.id}`, {
       enrollment: {
         status: newStatus.value,
       },

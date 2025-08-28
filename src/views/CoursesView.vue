@@ -36,16 +36,6 @@
           >
             Matricular-se
           </button>
-          <router-link
-            v-if="course.id"
-            :to="{ name: 'edit-course', params: { id: course.id } }"
-            class="action-button edit-button"
-          >
-            Editar
-          </router-link>
-          <button v-if="course.id" @click="deleteCourse(course.id)" class="action-button delete-button">
-            Excluir
-          </button>
         </div>
       </div>
     </div>
@@ -57,6 +47,7 @@
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import { useRouter } from 'vue-router';
+import { jwtDecode } from 'jwt-decode';
 
 interface Student {
   id: number;
@@ -78,12 +69,14 @@ interface Course {
   link: string;
   course_type: string;
   enrollments: Enrollment[];
+  user_id: number;
 }
 
 const courses = ref<Course[]>([]);
 const enrolledCourses = ref<Enrollment[]>([]);
 const loading = ref(true);
 const error = ref<string | null>(null);
+const currentUserId = ref<number | null>(null);
 
 const router = useRouter();
 
@@ -93,41 +86,27 @@ const fetchCoursesAndEnrollments = async () => {
     router.push('/login');
     return;
   }
+  
   try {
-    const coursesResponse = await axios.get('http://localhost:3000/api/v1/courses', {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    const decodedToken: any = jwtDecode(token);
+    currentUserId.value = decodedToken.user_id;
+  } catch (err) {
+    console.error('Erro ao decodificar o token:', err);
+    return;
+  }
 
-    let coursesData = coursesResponse.data.courses; // Corrigido para acessar a chave 'courses'
-    if (!Array.isArray(coursesData)) {
-      if (coursesData && Object.keys(coursesData).length > 0) {
-        coursesData = [coursesData];
-      } else {
-        coursesData = [];
-      }
-    }
-
-    courses.value = coursesData.map((course: any) => ({
-      ...course,
-      id: course?.id || null,
-      enrollments: Array.isArray(course?.enrollments) ? course.enrollments : [],
-    })).filter((course: { id: null; }) => course.id !== null);
-
-    const enrollmentsResponse = await axios.get('http://localhost:3000/api/v1/enrollments', {
+  try {
+    const response = await axios.get('http://localhost:3000/api/v1/courses', {
       headers: { Authorization: `Bearer ${token}` },
     });
     
-    const enrolledData = enrollmentsResponse.data.enrollments; 
+    courses.value = response.data.courses;
     
-    if (Array.isArray(enrolledData)) {
-      enrolledCourses.value = enrolledData;
+    if (Array.isArray(response.data.enrollments)) {
+        enrolledCourses.value = response.data.enrollments;
     } else {
-      enrolledCourses.value = [];
+        enrolledCourses.value = [];
     }
-
-    console.log('Cursos carregados:', courses.value);
-    console.log('Matrículas carregadas:', enrolledCourses.value);
-
   } catch (err) {
     console.error('Erro ao carregar dados:', err);
     error.value = 'Falha ao carregar a lista de cursos ou matrículas.';
@@ -161,27 +140,6 @@ const enroll = async (courseId: number) => {
   } catch (err) {
     console.error('Erro ao matricular-se:', err);
     error.value = 'Falha ao realizar a matrícula.';
-  }
-};
-
-const deleteCourse = async (courseId: number) => {
-  if (!confirm('Tem certeza de que deseja excluir este curso?')) {
-    return;
-  }
-  const token = localStorage.getItem('token');
-  if (!token) {
-    router.push('/login');
-    return;
-  }
-  try {
-    await axios.delete(`http://localhost:3000/api/v1/courses/${courseId}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    alert('Curso excluído com sucesso!');
-    await fetchCoursesAndEnrollments();
-  } catch (err) {
-    console.error('Erro ao excluir curso:', err);
-    error.value = 'Falha ao excluir o curso. Você pode não ter permissão.';
   }
 };
 
@@ -348,44 +306,5 @@ const formatDate = (dateString: string) => {
   text-align: center;
   margin-top: 1.5rem;
   font-size: 1rem;
-}
-</style>
-
-
-
-<style>
-body.dark-mode .page-container {
-  background-color: #2d3748;
-}
-body.dark-mode .page-title {
-  color: #a0aec0;
-}
-body.dark-mode .empty-message {
-  color: #a0aec0;
-}
-body.dark-mode .course-card {
-  background-color: #4a5568;
-  color: #e2e8f0;
-}
-body.dark-mode .course-title {
-  color: #e2e8f0;
-}
-body.dark-mode .course-description {
-  color: #a0aec0;
-}
-body.dark-mode .course-type {
-  color: #c4c4c4;
-}
-body.dark-mode .course-type span {
-  font-weight: bold;
-}
-body.dark-mode .course-info h3 {
-  color: #ccc;
-}
-body.dark-mode .enrollments-list li {
-  color: #aaa;
-}
-body.dark-mode .created-at {
-  color: #999;
 }
 </style>

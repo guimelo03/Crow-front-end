@@ -57,7 +57,7 @@ onMounted(async () => {
   }
 
   try {
-    const response = await axios.get('http://localhost:3000/api/v1/enrollments', {
+    const response = await axios.get('http://localhost:3000/api/v1/courses', {
       headers: { Authorization: `Bearer ${token}` },
     });
     enrollments.value = response.data;

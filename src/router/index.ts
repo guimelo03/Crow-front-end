@@ -1,22 +1,35 @@
 import { createRouter, createWebHistory, type RouteRecordRaw, type Router } from 'vue-router';
+import { jwtDecode } from 'jwt-decode';
+
 import LoginForm from '@/components/LoginForm.vue';
 import DashboardView from '@/views/DashboardView.vue';
 import CoursesView from '@/views/CoursesView.vue';
 import StudentsView from '../views/StudentsView.vue';
 import KanbanView from '../views/KanbanView.vue';
 import SignupView from '@/views/SignupView.vue';
-import CreateCourseView from '@/views/CreateCourseView.vue';
-import EditCoursesView from '@/views/EditCoursesView.vue';
-import CreateCourseByStudentView from '@/views/CreateCourseByStudentView.vue';
 import MyCoursesView from '@/views/MyCoursesView.vue';
+import CourseFormView from '@/views/CourseFormView.vue';
 import EditEnrollmentView from '@/views/EditEnrollmentView.vue';
 import EditStudentView from '@/views/EditStudentView.vue';
 import ShowStudentView from '@/views/ShowStudentView.vue';
 
+/*TODO= mover para um arquivo utils.ts para evitar repetição de código. */
+const isAdmin = () => {
+  const token = localStorage.getItem('token');
+  if (!token) return false;
+  try {
+    const decoded: any = jwtDecode(token);
+    return decoded.is_admin;
+  } catch (err) {
+    console.error("Failed to decode JWT:", err);
+    return false;
+  }
+};
+
 const routes: RouteRecordRaw[] = [
   {
     path: '/',
-    redirect: '/login',
+    redirect: '/dashboard',
   },
   {
     path: '/login',
@@ -33,7 +46,7 @@ const routes: RouteRecordRaw[] = [
     path: '/courses',
     name: 'courses',
     component: CoursesView,
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true, requiresAdmin: true },
   },
   {
     path: '/students',
@@ -49,7 +62,7 @@ const routes: RouteRecordRaw[] = [
   },
   {
     path: '/my-courses',
-    name: 'student-enrollments',
+    name: 'my-courses', 
     component: MyCoursesView,
     meta: { requiresAuth: true },
   },
@@ -61,20 +74,15 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/create-course',
     name: 'create-course',
-    component: CreateCourseView,
+    component: CourseFormView,
     meta: { requiresAuth: true },
   },
   {
     path: '/edit-course/:id',
     name: 'edit-course',
-    component: EditCoursesView,
+    component: CourseFormView,
+    props: true, 
     meta: { requiresAuth: true },
-  },
-  {
-    path: '/create-and-enroll',
-    name: 'create-and-enroll',
-    component: CreateCourseByStudentView,
-    meta: { requiresAuth: true }
   },
   {
     path: '/edit-enrollment/:id',
@@ -105,12 +113,17 @@ const router: Router = createRouter({
 router.beforeEach((to, from, next) => {
   const token = localStorage.getItem('token');
   const requiresAuth = to.matched.some((record) => record.meta.requiresAuth);
+  const requiresAdmin = to.matched.some((record) => record.meta.requiresAdmin);
 
   if (requiresAuth && !token) {
     next('/login');
   } else if (to.name === 'login' && token) {
     next('/dashboard');
-  } else {
+  } else if (requiresAdmin && !isAdmin()) {
+    alert('Acesso negado. Apenas administradores podem visualizar esta página.');
+    next(from.path);
+  }
+  else {
     next();
   }
 });

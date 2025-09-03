@@ -13,7 +13,6 @@
       <div class="user-profile">
         <UserDisplay />
       </div>
-
       <router-link to="/settings" class="nav-item">Configurações</router-link>
       <button @click="logout" class="nav-item logout-button">Sair</button>
     </aside>
@@ -28,9 +27,7 @@
         <nav class="nav-links">
           <router-link to="/dashboard" class="nav-item">Dashboard</router-link>
           <router-link to="/my-courses" class="nav-item">Meus Cursos</router-link>
-          
-          <router-link v-if="isAdmin" to="/courses" class="nav-item">Todos os Cursos</router-link>
-          
+          <router-link v-if="isAdmin()" to="/courses" class="nav-item">Todos os Cursos</router-link>
           <router-link to="/students" class="nav-item">Estudantes</router-link>
         </nav>
         <div class="user-info-container">
@@ -51,7 +48,7 @@ import { computed, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import ThemeToggle from './composables/ThemeToggle.vue';
 import UserDisplay from './components/UserDisplay.vue';
-import { jwtDecode } from 'jwt-decode';
+import { isAdmin } from './utils/utils';
 
 const route = useRoute();
 const router = useRouter();
@@ -86,18 +83,6 @@ const logout = () => {
   localStorage.removeItem('token');
   router.push('/login');
 };
-
-const isAdmin = computed(() => {
-    const token = localStorage.getItem('token');
-    if (!token) return false;
-    try {
-        const decoded: any = jwtDecode(token);
-        return decoded.is_admin;
-    } catch (err) {
-        console.error("Falha ao decodificar o token:", err);
-        return false;
-    }
-});
 </script>
 
 <style>

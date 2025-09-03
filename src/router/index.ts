@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory, type RouteRecordRaw, type Router } from 'vue-router';
-import { jwtDecode } from 'jwt-decode';
+import { isAdmin } from '@/utils/utils';
 
 import LoginForm from '@/components/LoginForm.vue';
 import DashboardView from '@/views/DashboardView.vue';
@@ -12,19 +12,6 @@ import CourseFormView from '@/views/CourseFormView.vue';
 import EditEnrollmentView from '@/views/EditEnrollmentView.vue';
 import EditStudentView from '@/views/EditStudentView.vue';
 import ShowStudentView from '@/views/ShowStudentView.vue';
-
-/*TODO= mover para um arquivo utils.ts para evitar repetição de código. */
-const isAdmin = () => {
-  const token = localStorage.getItem('token');
-  if (!token) return false;
-  try {
-    const decoded: any = jwtDecode(token);
-    return decoded.is_admin;
-  } catch (err) {
-    console.error("Failed to decode JWT:", err);
-    return false;
-  }
-};
 
 const routes: RouteRecordRaw[] = [
   {

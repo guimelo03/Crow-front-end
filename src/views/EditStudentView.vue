@@ -27,24 +27,16 @@
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import axios from 'axios';
-
-interface User {
-  id: number;
-  email: string;
-}
-
-interface Student {
-  id: number;
-  name: string;
-  user: User;
-}
+import type { Student } from '@/types';
 
 const student = ref<Student>({
   id: 0,
   name: '',
   user: {
     id: 0,
-    email: ''
+    name: '',
+    email: '',
+    is_admin: false
   }
 });
 

@@ -37,20 +37,12 @@
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import { useRouter, useRoute } from 'vue-router';
+import type { EditEnrollment } from '@/types';
 
 const router = useRouter();
 const route = useRoute();
 
-interface Enrollment {
-  id: number;
-  status: string;
-  course: {
-    title: string;
-    description: string;
-  };
-}
-
-const enrollment = ref<Enrollment | null>(null);
+const enrollment = ref<EditEnrollment | null>(null);
 const currentStatus = ref('');
 const newStatus = ref('to_do');
 const loading = ref(true);

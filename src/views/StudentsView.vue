@@ -24,17 +24,7 @@
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import { useRouter } from 'vue-router';
-
-interface User {
-  id: number;
-  email: string;
-}
-
-interface Student {
-  id: number;
-  name: string;
-  user: User;
-}
+import type { Student } from '@/types';
 
 const students = ref<Student[]>([]);
 const loading = ref(true);

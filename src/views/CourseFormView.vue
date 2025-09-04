@@ -40,16 +40,9 @@
 import { ref, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import axios from 'axios';
+import type { BaseCourse } from '@/types';
 
-interface Course {
-  id?: number;
-  title: string;
-  description: string;
-  course_type: string;
-  link: string;
-}
-
-const course = ref<Course>({
+const course = ref<BaseCourse>({
   title: '',
   description: '',
   course_type: '',

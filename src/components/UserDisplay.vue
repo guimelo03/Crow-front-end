@@ -13,11 +13,7 @@
 import { ref, onMounted, watch } from 'vue';
 import axios from 'axios';
 import { useRoute } from 'vue-router'; 
-
-interface User {
-  name: string;
-  email: string;
-}
+import type { User } from '@/types/index';
 
 const user = ref<User | null>(null);
 const route = useRoute(); 

@@ -30,17 +30,7 @@
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import axios from 'axios';
-
-interface User {
-  id: number;
-  email: string;
-}
-
-interface Student {
-  id: number;
-  name: string;
-  user: User;
-}
+import type { Student } from '@/types';
 
 const student = ref<Student | null>(null);
 const route = useRoute();

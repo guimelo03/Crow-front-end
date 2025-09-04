@@ -48,32 +48,10 @@ import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import { useRouter } from 'vue-router';
 import { jwtDecode } from 'jwt-decode';
-
-interface Student {
-  id: number;
-  name: string;
-}
-
-interface Enrollment {
-  id: number;
-  status: string;
-  created_at: string;
-  course_id: number;
-  student: Student;
-}
-
-interface Course {
-  id: number;
-  title: string;
-  description: string;
-  link: string;
-  course_type: string;
-  enrollments: Enrollment[];
-  user_id: number;
-}
+import type { CoursesViewEnrollment, Course } from '@/types';
 
 const courses = ref<Course[]>([]);
-const enrolledCourses = ref<Enrollment[]>([]);
+const enrolledCourses = ref<CoursesViewEnrollment[]>([]);
 const loading = ref(true);
 const error = ref<string | null>(null);
 const currentUserId = ref<number | null>(null);

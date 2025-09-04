@@ -39,15 +39,9 @@
 import { ref } from 'vue';
 import axios from 'axios';
 import { useRouter } from 'vue-router';
+import type { BaseCourse } from '@/types';
 
-interface Course {
-  title: string;
-  description: string;
-  link: string;
-  course_type: string;
-}
-
-const course = ref<Course>({
+const course = ref<BaseCourse>({
   title: '',
   description: '',
   link: '',

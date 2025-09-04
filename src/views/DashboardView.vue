@@ -25,12 +25,7 @@
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
-
-interface Stats {
-  total_students: number;
-  total_courses: number;
-  students_with_courses: number;
-}
+import type { Stats } from '@/types';
 
 const stats = ref<Stats>({
   total_students: 0,

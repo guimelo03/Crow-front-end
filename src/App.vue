@@ -86,7 +86,6 @@ const logout = () => {
 </script>
 
 <style>
-/* O estilo permanece o mesmo */
 html, body, #app {
   height: 100%;
   margin: 0;

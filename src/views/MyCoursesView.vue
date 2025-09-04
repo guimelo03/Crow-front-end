@@ -43,15 +43,7 @@
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import { useRouter } from 'vue-router';
-import { jwtDecode } from 'jwt-decode';
-
-interface UserCourse {
-  id: number;
-  title: string;
-  description: string;
-  link: string;
-  course_type: string;
-}
+import type { UserCourse } from '@/types';
 
 const myCourses = ref<UserCourse[]>([]);
 const loading = ref(true);
@@ -69,8 +61,6 @@ const fetchMyCourses = async () => {
     const response = await axios.get('http://localhost:3000/api/v1/courses', {
       headers: { Authorization: `Bearer ${token}` },
     });
-    
-    // A API já filtra os cursos por usuário, então podemos atribuir diretamente
     myCourses.value = response.data.courses;
   } catch (err) {
     console.error('Erro ao carregar os cursos do usuário:', err);

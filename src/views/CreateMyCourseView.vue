@@ -58,14 +58,12 @@ const createCourse = async () => {
     return;
   }
   try {
-    // Altere o endpoint para a nova rota de criação de cursos.
     await axios.post(
       'http://localhost:3000/api/v1/courses',
       { course: course.value },
       { headers: { Authorization: `Bearer ${token}` } }
     );
     alert('Curso criado com sucesso!');
-    // Redirecione o usuário de volta para a página de "Meus Cursos" para ver o curso novo.
     router.push('/my-courses');
   } catch (err) {
     console.error('Erro ao criar o curso:', err);
@@ -75,7 +73,6 @@ const createCourse = async () => {
 </script>
 
 <style scoped>
-/* O estilo CSS pode permanecer o mesmo, já que ele apenas estiliza o formulário */
 .page-container {
   max-width: 600px;
   margin: 2rem auto;

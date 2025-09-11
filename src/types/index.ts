@@ -1,3 +1,7 @@
+// src/types/index.ts
+
+// Interfaces de Entidades Básicas
+// -----------------------------------------------------------------------------
 export interface User {
   id: number;
   name: string;
@@ -5,67 +9,49 @@ export interface User {
   is_admin: boolean;
 }
 
-
-export interface UserCourse {
-  id: number;
-  title: string;
-  description: string;
-  link: string;
-  course_type: string;
-}
-
-export interface Student {
-  id: number;
-  name: string;
-  user: User;
-}
-
-export interface BaseCourse {
-  id?: number;
-  title: string;
-  description: string;
-  course_type: string;
-  link: string;
-}
-
-export interface Course extends BaseCourse {
-  enrollments: CoursesViewEnrollment[];
-  user_id: number;
-}
-
-export interface Stats {
-  total_students: number;
-  total_courses: number;
-  students_with_courses: number;
-}
-
-export interface UserCourse {
-  id: number;
-  title: string;
-  description: string;
-  link: string;
-  course_type: string;
-}
-
-export interface CoursesViewEnrollment {
+// Representa o objeto de matrícula que vem aninhado em um curso na API.
+export interface Enrollment {
   id: number;
   status: string;
   created_at: string;
   course_id: number;
-  student: Student;
+  // A API envia o objeto 'student' completo
+  student: User; 
 }
 
-export interface EditEnrollment {
+// Representa um curso em sua forma mais básica e o ID deve ser obrigatório aqui.
+export interface BaseCourse {
   id: number;
-  status: string;
-  course: {
-    title: string;
-    description: string;
-  };
+  title: string;
+  description: string;
+  course_type: string;
+  link: string;
 }
 
+// Interfaces de Cursos para cenários específicos
+// -----------------------------------------------------------------------------
+// Representa o curso para a tela de "Todos os Cursos" (para admins).
+export interface CourseAdmin extends BaseCourse {
+  creator_name: string;
+  enrollments: Enrollment[];
+}
+
+// Representa o curso para a tela de "Meus Cursos" (para alunos).
+export interface UserCourse extends BaseCourse {}
+
+// Interfaces de Matrícula para cenários específicos
+// -----------------------------------------------------------------------------
+// Apenas um exemplo de como tipar a matrícula para a tela de gerenciamento de aluno.
 export interface StudentEnrollment {
   id: number;
   status: string;
-  course: Course;
+  course: BaseCourse;
+}
+
+// Interfaces Adicionais
+// -----------------------------------------------------------------------------
+export interface Stats {
+  total_students: number;
+  total_courses: number;
+  students_with_courses: number;
 }

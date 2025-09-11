@@ -50,8 +50,7 @@ const fetchStudent = async () => {
     const response = await axios.get(`http://localhost:3000/api/v1/students/${studentId}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
-    
-    // CORREÇÃO: Acessar a propriedade 'student' dentro dos dados da resposta
+  
     student.value = response.data.student;
 
   } catch (err) {
@@ -93,7 +92,6 @@ onMounted(fetchStudent);
 </script>
 
 <style scoped>
-/* ... (Seus estilos CSS existentes) ... */
 .show-student-container {
   max-width: 700px;
   margin: 2rem auto;

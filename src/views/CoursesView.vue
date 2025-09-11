@@ -9,6 +9,7 @@
     <div v-else class="course-grid">
       <div v-for="course in courses" :key="course.id" class="course-card">
         <h2 class="course-title">{{ course.title }}</h2>
+        <p class="course-creator">Criado por: <strong>{{ course.creator_name }}</strong></p>
         <p class="course-description">{{ course.description }}</p>
         <p v-if="course.course_type" class="course-type">
           <span>Tipo:</span> {{ course.course_type }}
@@ -18,7 +19,7 @@
             <h3>Pessoas matriculadas:</h3>
             <ul class="enrollments-list">
               <li v-for="enrollment in course.enrollments" :key="enrollment.id">
-                <span>{{ enrollment.student.name }}</span>
+                <span>{{ enrollment.student }}</span>
                 <span>(Status: {{ statusText(enrollment.status) }})</span>
                 <span class="created-at">Início: {{ formatDate(enrollment.created_at) }}</span>
               </li>
@@ -36,6 +37,13 @@
           >
             Matricular-se
           </button>
+          <button
+            v-if="isAdmin"
+            @click="deleteCourse(course.id)"
+            class="action-button delete-button"
+          >
+            Excluir Curso
+          </button>
         </div>
       </div>
     </div>
@@ -47,14 +55,13 @@
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import { useRouter } from 'vue-router';
-import { jwtDecode } from 'jwt-decode';
-import type { CoursesViewEnrollment, Course } from '@/types';
+import type { CourseAdmin } from '@/types';
+import { isAdmin } from '@/utils/utils';
 
-const courses = ref<Course[]>([]);
-const enrolledCourses = ref<CoursesViewEnrollment[]>([]);
+const courses = ref<CourseAdmin[]>([]);
+const enrolledCourses = ref<number[]>([]); 
 const loading = ref(true);
 const error = ref<string | null>(null);
-const currentUserId = ref<number | null>(null);
 
 const router = useRouter();
 
@@ -66,24 +73,14 @@ const fetchCoursesAndEnrollments = async () => {
   }
   
   try {
-    const decodedToken: any = jwtDecode(token);
-    currentUserId.value = decodedToken.user_id;
-  } catch (err) {
-    console.error('Erro ao decodificar o token:', err);
-    return;
-  }
-
-  try {
     const response = await axios.get('http://localhost:3000/api/v1/courses', {
       headers: { Authorization: `Bearer ${token}` },
     });
-    
-    courses.value = response.data.courses;
-    
-    if (Array.isArray(response.data.enrollments)) {
-        enrolledCourses.value = response.data.enrollments;
-    } else {
-        enrolledCourses.value = [];
+    if (Array.isArray(response.data)) {
+        courses.value = response.data;
+    } else if (response.data.courses) {
+        courses.value = response.data.courses;
+        enrolledCourses.value = (response.data.enrollments || []).map((e: any) => e.course_id);
     }
   } catch (err) {
     console.error('Erro ao carregar dados:', err);
@@ -96,9 +93,7 @@ const fetchCoursesAndEnrollments = async () => {
 onMounted(fetchCoursesAndEnrollments);
 
 const isEnrolled = (courseId: number): boolean => {
-  return enrolledCourses.value?.some((enrollment: any) => {
-    return enrollment?.course?.id === courseId;
-  }) || false;
+  return enrolledCourses.value.includes(courseId);
 };
 
 const enroll = async (courseId: number) => {
@@ -137,6 +132,27 @@ const statusText = (status: string) => {
 const formatDate = (dateString: string) => {
   const options: Intl.DateTimeFormatOptions = { day: '2-digit', month: '2-digit', year: 'numeric' };
   return new Date(dateString).toLocaleDateString('pt-BR', options);
+};
+
+const deleteCourse = async (courseId: number) => {
+  if (!confirm('Tem certeza de que deseja excluir este curso? Todas as matrículas serão removidas')){
+    return
+  }
+  const token = localStorage.getItem('token');
+  if (!token){
+    router.push('/login');
+    return;
+  }
+  try {
+    await axios.delete(`http://localhost:3000/api/v1/courses/${courseId}`, {
+      headers: { Authorization: `Bearer ${token}`},
+    });
+    alert('Curso e todas as matrículas associadas removidas com sucesso!');
+    await fetchCoursesAndEnrollments();
+  } catch (err) {
+    console.error('Erro ao excluir curso: ', err);
+    error.value = 'Falha ao excluir curso. ';
+  }
 };
 </script>
 

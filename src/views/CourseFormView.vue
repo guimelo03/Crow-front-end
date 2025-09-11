@@ -43,6 +43,7 @@ import axios from 'axios';
 import type { BaseCourse } from '@/types';
 
 const course = ref<BaseCourse>({
+  id: 0,
   title: '',
   description: '',
   course_type: '',
@@ -99,7 +100,7 @@ const submitForm = async () => {
         headers: { Authorization: `Bearer ${token}` },
       });
       success.value = 'Curso criado com sucesso!';
-      course.value = { title: '', description: '', course_type: '', link: '' }; 
+      course.value = {id: 0, title: '', description: '', course_type: '', link: '' }; 
     }
   } catch (err) {
     console.error('Erro ao salvar o curso:', err);

@@ -7,22 +7,29 @@ export interface User {
   is_admin: boolean;
 }
 
-// Representa o objeto de matrícula que vem aninhado em um curso na API.
-export interface Enrollment {
+export interface Student {
   id: number;
-  status: string;
-  created_at: string;
-  course_id: number;
-  student: User; 
+  name: string;
+  user: User;
 }
 
-// Representa um curso em sua forma mais básica e o ID deve ser obrigatório aqui.
 export interface BaseCourse {
   id: number;
   title: string;
   description: string;
   course_type: string;
   link: string;
+}
+
+// Interfaces de Matrícula (que dependem das básicas)
+// -----------------------------------------------------------------------------
+export interface Enrollment {
+  id: number;
+  status: string;
+  created_at: string;
+  course_id: number;
+  student: Student;
+  course: BaseCourse;
 }
 
 // Interfaces de Cursos para cenários específicos
@@ -32,16 +39,7 @@ export interface CourseAdmin extends BaseCourse {
   enrollments: Enrollment[];
 }
 
-// Representa o curso para a tela de "Meus Cursos" (para alunos).
 export interface UserCourse extends BaseCourse {}
-
-// Interfaces de Matrícula para cenários específicos
-// -----------------------------------------------------------------------------
-export interface StudentEnrollment {
-  id: number;
-  status: string;
-  course: BaseCourse;
-}
 
 // Interfaces Adicionais
 // -----------------------------------------------------------------------------

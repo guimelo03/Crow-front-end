@@ -42,6 +42,7 @@ import { useRouter } from 'vue-router';
 import type { BaseCourse } from '@/types';
 
 const course = ref<BaseCourse>({
+  id: 0,
   title: '',
   description: '',
   link: '',

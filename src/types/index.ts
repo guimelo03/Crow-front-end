@@ -1,5 +1,3 @@
-// src/types/index.ts
-
 // Interfaces de Entidades Básicas
 // -----------------------------------------------------------------------------
 export interface User {
@@ -15,7 +13,6 @@ export interface Enrollment {
   status: string;
   created_at: string;
   course_id: number;
-  // A API envia o objeto 'student' completo
   student: User; 
 }
 
@@ -30,7 +27,6 @@ export interface BaseCourse {
 
 // Interfaces de Cursos para cenários específicos
 // -----------------------------------------------------------------------------
-// Representa o curso para a tela de "Todos os Cursos" (para admins).
 export interface CourseAdmin extends BaseCourse {
   creator_name: string;
   enrollments: Enrollment[];
@@ -41,7 +37,6 @@ export interface UserCourse extends BaseCourse {}
 
 // Interfaces de Matrícula para cenários específicos
 // -----------------------------------------------------------------------------
-// Apenas um exemplo de como tipar a matrícula para a tela de gerenciamento de aluno.
 export interface StudentEnrollment {
   id: number;
   status: string;

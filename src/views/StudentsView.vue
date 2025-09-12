@@ -24,9 +24,9 @@
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import { useRouter } from 'vue-router';
-import type { StudentEnrollment } from '@/types';
+import type { Student } from '@/types';
 
-const students = ref<StudentEnrollment[]>([]);
+const students = ref<Student[]>([]);
 const loading = ref(true);
 const error = ref<string | null>(null);
 const router = useRouter();

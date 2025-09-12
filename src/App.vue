@@ -249,4 +249,41 @@ body.dark-mode .main-header {
   background-color: #e2e8f0;
   color: #9370DB;
 }
+
+body.dark-mode .sidebar-panel {
+  background-color: #2d3748;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.4);
+}
+
+body.dark-mode .sidebar-toggle-button {
+  background-color: #6a0dad;
+}
+
+body.dark-mode .sidebar-toggle-button:hover {
+  background-color: #9370db;
+}
+
+body.dark-mode .sidebar-panel .nav-item {
+  color: #a0aec0;
+}
+
+body.dark-mode .sidebar-panel .nav-item:hover,
+body.dark-mode .sidebar-panel .nav-item.nav-item.router-link-active {
+  background-color: #4a5568;
+  columns: #9370db;
+}
+
+body.dark-mode .sidebar-panel .logout-button {
+  background-color: transparent;
+  color: #a0aec0;
+}
+
+body.dark-mode .sidebar-panel .logout-button:hover {
+  background-color: #4a5568;
+  color: #9370db;
+}
+
+body.dark-mode .icon {
+  fill: #fff;
+}
 </style>

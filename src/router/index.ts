@@ -82,7 +82,7 @@ const routes: RouteRecordRaw[] = [
     path: '/edit-student/:id',
     name: 'edit-student',
     component: EditStudentView,
-    meta: { requiresAuth: true }
+    meta: { requiresAuth: true, requiresAdmin: true }
   },
   {
     path: '/show-student/:id',
@@ -97,19 +97,47 @@ const router: Router = createRouter({
   routes,
 });
 
+// router.beforeEach((to, from, next) => {
+//   const token = localStorage.getItem('token');
+//   const requiresAuth = to.matched.some((record) => record.meta.requiresAuth);
+//   const requiresAdmin = to.matched.some((record) => record.meta.requiresAdmin);
+
+//   if (requiresAuth && !token) {
+//     next('/login');
+//   } else if (to.name === 'login' && token) {
+//     next('/dashboard');
+//   } else if (requiresAdmin && !isAdmin()) {
+//     alert('Acesso negado. Apenas administradores podem visualizar esta página.');
+//     next(from.path);
+//   }
+//   else {
+//     next();
+//   }
+// });
+
 router.beforeEach((to, from, next) => {
   const token = localStorage.getItem('token');
   const requiresAuth = to.matched.some((record) => record.meta.requiresAuth);
   const requiresAdmin = to.matched.some((record) => record.meta.requiresAdmin);
 
   if (requiresAuth && !token) {
-    next('/login');
-  } else if (to.name === 'login' && token) {
-    next('/dashboard');
-  } else if (requiresAdmin && !isAdmin()) {
-    alert('Acesso negado. Apenas administradores podem visualizar esta página.');
-    next(from.path);
+    alert('Você precisa estar logado para acessar esta página.');
+    next({ name: 'login' });
+  } 
+  
+  else if (requiresAdmin && token) {
+      if (!isAdmin()) {
+        alert('Acesso negado. Apenas administradores podem visualizar esta página.');
+        next({ name: 'dashboard' });
+      } else {
+        next(); 
+      }
   }
+
+  else if (to.name === 'login' && token) {
+    next({ name: 'dashboard' });
+  } 
+  
   else {
     next();
   }

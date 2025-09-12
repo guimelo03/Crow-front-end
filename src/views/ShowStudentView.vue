@@ -17,8 +17,8 @@
         </div>
       </div>
       <div class="card-footer">
-        <button @click="editStudent(student.id)" class="action-button edit-button">Editar</button>
-        <button @click="confirmDelete(student.id)" class="action-button delete-button">Excluir</button>
+        <button v-if="isAdmin" @click="editStudent(student.id)" class="action-button edit-button">Editar</button>
+        <button v-if="isAdmin" @click="confirmDelete" class="action-button delete-button">Excluir</button>
       </div>
     </div>
 
@@ -31,12 +31,14 @@ import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import axios from 'axios';
 import type { Student } from '@/types';
+import { jwtDecode } from 'jwt-decode';
 
 const student = ref<Student | null>(null);
 const route = useRoute();
 const router = useRouter();
 const loading = ref(true);
 const error = ref<string | null>(null);
+const isAdmin = ref(false);
 
 const fetchStudent = async () => {
   const studentId = route.params.id;
@@ -44,6 +46,14 @@ const fetchStudent = async () => {
   if (!token) {
     router.push('/login');
     return;
+  }
+
+  try {
+    const decodedToken: any = jwtDecode(token);
+    isAdmin.value = decodedToken.is_admin;
+  } catch (err) {
+    console.log('Erro ao decodificar o token: ', err);
+    isAdmin.value = false;
   }
 
   try {
@@ -61,31 +71,38 @@ const fetchStudent = async () => {
   }
 };
 
-const editStudent = (studentId: number) => {
-  router.push({ name: 'edit-student', params: { id: studentId.toString() } });
-};
-
-const confirmDelete = async (studentId: number) => {
-  if (!confirm('Tem certeza que deseja excluir este aluno?')) {
+const deleteStudent = async () => {
+  if (!isAdmin.value){
+    alert('Acesso negado. Você não tem permissão para excluir alunos.');
     return;
   }
 
+  if (!confirm('Tem certeza de que deseja excluir este aluno? Esta ação não pode ser desfeita.')){
+    return;
+  }
   const token = localStorage.getItem('token');
-  if (!token) {
+  if (!token){
     router.push('/login');
     return;
   }
-
   try {
-    await axios.delete(`http://localhost:3000/api/v1/students/${studentId}`, {
-      headers: { Authorization: `Bearer ${token}` },
+    await axios.delete(`http://localhost:3000/api/v1/students/${student.value?.id}`, {
+      headers: { Authorization: `Bearer ${token}` }
     });
     alert('Aluno excluído com sucesso!');
-    router.push('/students');
+    router.push('/students'); 
   } catch (err) {
-    console.error('Erro ao excluir aluno:', err);
-    alert('Falha ao excluir o aluno.');
+    console.error('Erro ao excluir aluno: ', err);
+    alert('Falha ao excluir aluno. Pode não possuir as permissões necessárias para isso, fale com o administrador.');
   }
+};
+
+const confirmDelete = async () => {
+  await deleteStudent();
+};
+
+const editStudent = (studentId: number) => {
+  router.push({ name: 'edit-student', params: { id: studentId.toString() } });
 };
 
 onMounted(fetchStudent);

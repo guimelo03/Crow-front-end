@@ -11,8 +11,8 @@
           <p class="student-id">ID: {{ student.id }}</p>
         </div>
         <div class="card-actions">
-          <button @click="editStudent(student.id)" class="edit-button">Editar</button>
-          <button @click="deleteStudent(student.id)" class="delete-button">Excluir</button>
+          <button v-if="isAdmin" @click="editStudent(student.id)" class="edit-button">Editar</button>
+          <button v-if="isAdmin" @click="deleteStudent(student.id)" class="delete-button">Excluir</button>
           <router-link :to="{ name: 'show-student', params: { id: student.id } }" class="view-button">Ver</router-link>
         </div>
       </div>
@@ -25,11 +25,13 @@ import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import { useRouter } from 'vue-router';
 import type { Student } from '@/types';
+import { jwtDecode } from 'jwt-decode';
 
 const students = ref<Student[]>([]);
 const loading = ref(true);
 const error = ref<string | null>(null);
 const router = useRouter();
+const isAdmin = ref(false);
 
 const fetchStudents = async () => {
   const token = localStorage.getItem('token');
@@ -37,6 +39,14 @@ const fetchStudents = async () => {
     router.push('/login');
     return;
   }
+  try {
+    const decodedToken: any = jwtDecode(token);
+    isAdmin.value = decodedToken.is_admin;
+  } catch (err) {
+    console.error('Erro ao decodificar o token:', err);
+    isAdmin.value = false;
+  }
+
   try {
     const response = await axios.get('http://localhost:3000/api/v1/students', {
       headers: { Authorization: `Bearer ${token}` },
@@ -53,29 +63,34 @@ const fetchStudents = async () => {
 onMounted(fetchStudents);
 
 const editStudent = (studentId: number) => {
-  router.push({ name: 'edit-student', params: { id: studentId.toString() } });
+    router.push({ name: 'edit-student', params: { id: studentId.toString() } });
 };
 
 const deleteStudent = async (studentId: number) => {
-  if (!confirm('Tem certeza que deseja excluir este aluno?')) {
-    return;
-  }
-  const token = localStorage.getItem('token');
-  if (!token) {
-    router.push('/login');
-    return;
-  }
-  try {
-    await axios.delete(`http://localhost:3000/api/v1/students/${studentId}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    students.value = students.value.filter(student => student.id !== studentId);
-    alert('Aluno excluído com sucesso!');
-  } catch (err) {
-    console.error('Erro ao excluir aluno:', err);
-    alert('Falha ao excluir o aluno.');
-  }
-};
+    if (!isAdmin.value) {
+        alert('Acesso negado. Você não tem permissão para excluir alunos.');
+        return;
+    }
+
+    if (!confirm('Tem certeza que deseja excluir este aluno?')) {
+        return;
+    }
+    const token = localStorage.getItem('token');
+    if (!token){
+        router.push('/login');
+        return;
+    }
+    try {
+        await axios.delete(`http://localhost:3000/api/v1/students/${studentId}`, {
+            headers: { Authorization: `Bearer ${token}`},
+        });
+        students.value = students.value.filter(student => student.id !== studentId);
+        alert('Aluno excluído com sucesso!');
+    } catch (err) {
+        console.error('Erro ao excluir aluno:', err);
+        alert('Falha ao excluir o aluno. Pode ser que não tenha a permissão necessária, contate o administrador');
+    }
+}
 </script>
 
 <style scoped>
